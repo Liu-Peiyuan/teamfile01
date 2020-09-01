@@ -8,7 +8,7 @@
 // マクロ定義
 //*****************************************************************************
 #define EFFECT_TEXTURE			_T("data/TEXTURE/bullethit2_front.png")	// 画像
-#define EFFECT_TEXTURE_FLARE	_T("data/TEXTURE/flare01.png")			// 画像
+#define EFFECT_TEXTURE_FLARE	_T("data/TEXTURE/blood02.png")			// 画像
 
 #define EFFECT_TEXTURE_SIZE_X	(128.0f / 1.5f)		// テクスチャサイズ
 #define EFFECT_TEXTURE_SIZE_Y	(128.0f / 1.5f)		// 同上
@@ -26,7 +26,7 @@
 #define	MAX_EXPLOSION					(128)		// ビルボード最大数
 #define EFFECT_NUM_PARTS				(10)		// エフェクトの最大パターン数
 #define EFFECT_NUM_EFFECTS				(5)			// エフェクトの1段の最大パターン数
-
+#define EFFECT_LIFE_TIME				(15)		// エフェクトの最大パターン数
 
 /**************************************************************************//**
 	@struct		PARTICLE
@@ -48,6 +48,13 @@ typedef struct
 	bool			bIsFinish;
 }PARTICLE;
 
+typedef struct
+{
+	int				texType;
+	int				texDivedX;
+	int				texDivedY;
+}EFECTTEX;
+
 typedef struct	// エフェクト構造体
 {
 	int				nUse;						//!< 使用されているか
@@ -63,10 +70,10 @@ typedef struct	// エフェクト構造体
 	int				nEffectCount;				//!< エフェクトパターンのカウント
 	int				nEmitCounter;				//!< エミット数カウント
 
+	EFECTTEX		texture;					//!< テクスチャの設定
 	PARTICLE		pParticle[EFFECT_NUM_PARTS];	//!< パーティクルワーク
 
 }EFFECT;
-
 
 /**************************************************************************//**
 	@brief		エフェクトの初期化処理
