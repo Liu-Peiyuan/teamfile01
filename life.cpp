@@ -7,6 +7,7 @@
 #include "life.h"
 #include "input.h"
 #include "playerTest.h"
+#include "scene.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -31,7 +32,7 @@ void SetTextureLife(int nIdx,float y,float alpha);
 //*****************************************************************************
 // グローバル変数宣言
 //*****************************************************************************
-LPDIRECT3DTEXTURE9		g_pD3DTextureLife[2] = {};		// テクスチャへのポインタ
+LPDIRECT3DTEXTURE9		g_pD3DTextureLife[2] = { NULL };		// テクスチャへのポインタ
 LPDIRECT3DVERTEXBUFFER9 g_pD3DVtxBuffLife = NULL;		// 頂点バッファインターフェースへのポインタ
 
 D3DXVECTOR3				g_posLife;						// 位置
@@ -148,18 +149,9 @@ void UpdateLife(void)
 	if (GetKeyboardTrigger(DIK_1))ChangeLife(-1);
 	if (GetKeyboardTrigger(DIK_2))ChangeLife(1);
 
-	if (GetKeyboardTrigger(DIK_3)) 
-	{
-		ChangeLife(-1);
-		ChangeLife(-1);
-		ChangeLife(1);
-	}
-	if (GetKeyboardTrigger(DIK_4)) {
-		ChangeLife(1);
-		ChangeLife(1);
-		ChangeLife(-1);
-	}
 
+	//強制result行き
+	if (GetKeyboardTrigger(DIK_0))SetScene(SCENE_RESULT);
 #endif
 }
 

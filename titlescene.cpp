@@ -6,6 +6,8 @@
 // インクルードファイル
 #include "main.h"
 #include "bg.h"
+#include "savefile.h"
+#include "sound.h"
 
 // マクロ定義
 
@@ -14,13 +16,19 @@
 // 初期化処理
 void InitTitleScene(void)
 {
-	InitBg();
+	InitBg(TITLE_BG);
+	SaveData();
+	// BGM再生
+	PlaySound(SOUND_LABEL_BGM_sample000);
 }
 
 // 終了処理
 void UninitTitleScene(void)
 {
 	UninitBg();
+	// BGM停止
+	StopSound(SOUND_LABEL_BGM_sample000);
+
 }
 
 // 更新処理
