@@ -8,6 +8,7 @@
 #include "main.h"
 
 #define SIZE_X	(40)
+#define SIZE_GOAL_X	(20)
 #define SIZE_Y	(15)
 #define MAP_MAXDATA	(4)
 #define MAP_BONUS_MAXDATA	(4)
@@ -46,6 +47,7 @@ enum BLOCKTYPE
 	BOSS1,
 	BOSS2,
 	BOSS3,
+	GOAL,
 	MAXTYPE
 };
 
