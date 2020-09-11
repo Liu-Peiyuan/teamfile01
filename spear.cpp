@@ -15,7 +15,7 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_GAME_SPEAR		_T("data/TEXTURE/spears/spear01.png")			// 針の画像
+#define TEXTURE_GAME_SPEAR		_T("data/TEXTURE/spears/spear02.png")			// 針の画像
 #define POP_COUNT_SPEAR	(60 * 3)
 
 // 針の向いている方向
@@ -133,8 +133,7 @@ void UpdateSpear(void)
 
 			MoveSpear(i);
 			// 画面外まで進んだ？
-			if (spear->pos.x < 0.0f
-				|| spear->pos.x >=SCREEN_WIDTH)	// 自分の大きさを考慮して画面外か判定している
+			if (spear->pos.x < 0.0f)	// 自分の大きさを考慮して画面外か判定している
 			{
 				spear->use = false;
 			}

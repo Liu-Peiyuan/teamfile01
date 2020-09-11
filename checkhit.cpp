@@ -1,5 +1,5 @@
 //! @file	checkhit.cpp
-//! @author	まよ
+//! @author	kitade mayumi
 //! @date	2020-06-18
 //! @brief	衝突判定の実装
 
@@ -424,6 +424,11 @@ void CheckHitItem(void)
 				if (player->hp != PLAYER_HP)
 				{
 					player->hp++;
+					SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME, ITEM_HEAL);
+				}
+				else
+				{
+					SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME, ITEM_GET);
 				}
 				if (item->type == STAR)
 				{
@@ -431,7 +436,6 @@ void CheckHitItem(void)
 					item->use = false;
 				}
 				ChangeScore(item->point * 10);		// スコア加算
-				//SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME);
 				PlaySound(SOUND_LABEL_SE_ITEM);
 
 			}
@@ -478,7 +482,7 @@ void CheckHitEnemy(void)
 				// ライフの減少
 				ChangeScore(-SCORE_SNIPER_ENEMY);
 				damage = false;
-				SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME);
+				SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME, PLAYER_BLOOD);
 				PlaySound(SOUND_LABEL_SE_HIT);
 			}
 		}
@@ -524,7 +528,7 @@ void CheckHitBoss(void)
 				// ライフの減少
 				ChangeScore(-SCORE_SNIPER_ENEMY);
 				damage = false;
-				SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME);
+				SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME, PLAYER_BLOOD);
 				PlaySound(SOUND_LABEL_SE_HIT);
 			}
 		}
@@ -567,7 +571,7 @@ void CheckSpear(void)
 			PlaySound(SOUND_LABEL_SE_HIT);
 		}
 		damage = false;
-		SetEffect(spear->pos.x, spear->pos.y, EFFECT_LIFE_TIME);
+		SetEffect(spear->pos.x, spear->pos.y, EFFECT_LIFE_TIME, PLAYER_BLOOD);
 	}
 }
 
@@ -596,7 +600,7 @@ void CheckEnemyBullet(void)
 				bullet[j].use = false;
 				ChangeScore(SCORE_SNIPER_ENEMY);
 				enemy->use = false;
-				SetEffect(enemy->pos.x, enemy->pos.y, EFFECT_LIFE_TIME);
+				SetEffect(enemy->pos.x, enemy->pos.y, EFFECT_LIFE_TIME, ENEMY_BLOOD);
 				PlaySound(SOUND_LABEL_SE_HIT);
 
 			}
@@ -612,24 +616,38 @@ void CheckPlayerBullet(void)
 	PLAYER *player = GetPlayer();
 	CHANGE_LIFE *life = GetLifeState();
 	ENEMYBULLET *bullet = GetEnemyBullet(0);
+	bool damage = false;
 
 	for (int j = 0; j < BULLET_MAX; j++, bullet++)
 	{
 		if (bullet[j].use == false) continue;
 
-		if (player->use == false) continue;
-
 		if (CheckHitBB(player->pos, bullet->pos,
 			D3DXVECTOR2(TEXTURE_BULLET_SIZE_X, TEXTURE_BULLET_SIZE_Y),
 			D3DXVECTOR2(PLAYER_TEXTURE_SIZE_X, PLAYER_TEXTURE_SIZE_Y)))
 		{
-			//player->hp -= 1;
 			bullet[j].use = false;
-			ChangeScore(-SCORE_SNIPER_ENEMY);
-			SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME);
-			PlaySound(SOUND_LABEL_SE_HIT);
+			damage = true;
 
 		}
+
+		if (damage && player->invincible == false)
+		{
+			if (!player->superInvincible)
+			{
+				player->invincible = true;
+				// プレイヤーのHPが減少する
+				player->hp--;
+				life--;
+				ChangeLife(-1);
+				// ライフの減少
+				ChangeScore(-SCORE_SNIPER_ENEMY);
+				damage = false;
+				SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME, PLAYER_BLOOD);
+				PlaySound(SOUND_LABEL_SE_HIT);
+			}
+		}
+
 	}
 }
 
@@ -647,8 +665,9 @@ void CheckHitWall(void)
 	{
 		if (wall->pos.x >= player->pos.x)
 		{
-			SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME);
+			SetEffect(player->pos.x, player->pos.y, EFFECT_LIFE_TIME, PLAYER_BLOOD);
 			player->use = false;
+			PlaySound(SOUND_LABEL_SE_HIT);
 		}
 	}
 
@@ -660,7 +679,7 @@ void CheckHitWall(void)
 		{
 			enemy->damage = true;
 			enemy->use = false;
-			SetEffect(enemy->pos.x, enemy->pos.y, EFFECT_LIFE_TIME);
+			SetEffect(enemy->pos.x, enemy->pos.y, EFFECT_LIFE_TIME, ENEMY_BLOOD);
 		}
 	}
 
@@ -671,11 +690,20 @@ void CheckHitWall(void)
 		if (wall->pos.x >= item->pos.x)
 		{
 			item->use = false;
-			SetEffect(item->pos.x, item->pos.y, EFFECT_LIFE_TIME);
-			PlaySound(SOUND_LABEL_SE_HIT);
+			SetEffect(item->pos.x, item->pos.y, EFFECT_LIFE_TIME, ITEM_HEAL);
 
 		}
 	}
+
+	if (GetSubstitute()->use)
+	{
+		if (wall->pos.x >= GetSubstitute()->pos.x)
+		{
+			GetSubstitute()->use = false;
+			SetEffect(GetSubstitute()->pos.x, GetSubstitute()->pos.y, EFFECT_LIFE_TIME, ITEM_HEAL);
+		}
+	}
+
 }
 
 
@@ -721,7 +749,7 @@ void CheckHitKiller(void)
 
 			}
 			damage = false;
-			SetEffect(killer->pos.x, killer->pos.y, EFFECT_LIFE_TIME);
+			SetEffect(killer->pos.x, killer->pos.y, EFFECT_LIFE_TIME, KILLER_APPEAR);
 			killer->use = false;
 			killer->dead = true;
 		}
@@ -760,6 +788,7 @@ void CheckHitGoal(void)
 {
 	PLAYER *player = GetPlayer();
 	MAP * map = GetMapData();
+	int scene = GetScene();
 
 	if (player->use)
 	{
@@ -771,8 +800,21 @@ void CheckHitGoal(void)
 				if (CheckHitBC(player->pos, map->pos, PLAYER_TEXTURE_BB_SIZE_TOP_X, SIZE_GOAL_X))
 				{
 					PlaySound(SOUND_LABEL_SE_WARP);
-					SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_GAMESTAGE);
-					player->use = false;
+					if (scene == SCENE_GAME)
+					{
+						SetFade(FADE_OUT, SCENE_RESULT, SOUND_LABEL_BGM_GAMESTAGE);
+						player->use = false;
+						return;
+					}
+					else
+					{
+						SetFade(FADE_OUT, SCENE_GAME, SOUND_LABEL_BGM_TUTRIAL);
+						player->warpUse = false;
+						player->scrollPos = D3DXVECTOR3(/*i*200.0f + */200.0f, 300.0f, 0.0f);// 座標データを初期化
+						player->partsState = PERFECT;
+						player->hp = PLAYER_HP;									// HPの初期化
+						return;
+					}
 				}
 			}
 		}
@@ -786,7 +828,6 @@ void CheckHitPlayerSubstitute(void)
 {
 	PLAYER *player = GetPlayer();
 	SUBSTITUTE *substitute = GetSubstitute();
-
 	if (player->use)
 	{
 		// 身代わりアイテムとの衝突判定を行う
@@ -797,7 +838,6 @@ void CheckHitPlayerSubstitute(void)
 				substitute->sticking = true;
 				substitute->releaseUse = false;
 				SetPosSubstitute();
-				PlaySound(SOUND_LABEL_SE_ITEM);
 			}
 		}
 	}
@@ -822,8 +862,8 @@ void CheckHitEnemySubstitute(void)
 		{
 			if (substitute->attackUse)
 			{
-				SetEffect(substitute->pos.x, substitute->pos.y, EFFECT_LIFE_TIME);
-				substitute->use = false;
+				SetEffect(substitute->pos.x, substitute->pos.y, EFFECT_LIFE_TIME, PLAYER_BLOOD);
+				//substitute->use = false;
 				enemy->use = false;
 				PlaySound(SOUND_LABEL_SE_HIT);
 			}

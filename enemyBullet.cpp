@@ -1,5 +1,5 @@
 //! @file	enemyBullet.cpp
-//! @author	まよ
+//! @author	kitade mayumi
 //! @date	2020-08-04
 //! @brief	エネミー用の弾の実装
 
@@ -61,7 +61,7 @@ HRESULT InitEnemyBullet(int type)
 		bullet->rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			// 回転データを初期化
 		bullet->PatternAnim = 0;								// アニメパターン番号をランダムで初期化
 		bullet->CountAnim = 0;									// アニメカウントを初期化
-		bullet->speed = 3.0f;
+		bullet->speed = 1.4f;
 
 		bullet->Texture = g_pD3DTextureEnemyBullet;					// テクスチャ情報
 		MakeVertexEnemyBullet(i);									// 頂点情報の作成
@@ -112,7 +112,7 @@ void UpdateEnemyBullet(void)
 			if ((bullet->CountAnim % TIME_ANIMATION_BULLET) == 0)
 			{
 				// パターンの切り替え
-				bullet->PatternAnim = (bullet->PatternAnim + 1) % ANIM_PATTERN_NUM_BULLET;
+				bullet->PatternAnim = (bullet->PatternAnim + 1) % ANIM_PATTERN_NUM_ENEMY_BULLET;
 			}
 			SetTextureEnemyBullet(i, bullet->PatternAnim);	// アニメーション後のテクスチャの設定
 
@@ -189,9 +189,9 @@ HRESULT MakeVertexEnemyBullet( int no )
 
 	// テクスチャ座標の設定
 	bullet->vertexWk[0].tex = D3DXVECTOR2(0.0f, 0.0f);
-	bullet->vertexWk[1].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_BULLET, 0.0f);
-	bullet->vertexWk[2].tex = D3DXVECTOR2(0.0f, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_BULLET);
-	bullet->vertexWk[3].tex = D3DXVECTOR2( 1.0f/ TEXTURE_PATTERN_DIVIDE_X_BULLET, 1.0f/TEXTURE_PATTERN_DIVIDE_Y_BULLET);
+	bullet->vertexWk[1].tex = D3DXVECTOR2(1.0f / TEXTURE_PATTERN_DIVIDE_X_ENEMY_BULLET, 0.0f);
+	bullet->vertexWk[2].tex = D3DXVECTOR2(0.0f, 1.0f / TEXTURE_PATTERN_DIVIDE_Y_ENEMY_BULLET);
+	bullet->vertexWk[3].tex = D3DXVECTOR2( 1.0f/ TEXTURE_PATTERN_DIVIDE_X_ENEMY_BULLET, 1.0f/ TEXTURE_PATTERN_DIVIDE_Y_ENEMY_BULLET);
 
 	return S_OK;
 }
@@ -208,10 +208,10 @@ void SetTextureEnemyBullet( int no, int cntPattern )
 	ENEMYBULLET *bullet = &g_enemyBullet[no];			// バレットのポインターを初期化
 
 	// テクスチャ座標の設定
-	int x = cntPattern % TEXTURE_PATTERN_DIVIDE_X_BULLET;
-	int y = cntPattern / TEXTURE_PATTERN_DIVIDE_X_BULLET;
-	float sizeX = 1.0f / TEXTURE_PATTERN_DIVIDE_X_BULLET;
-	float sizeY = 1.0f / TEXTURE_PATTERN_DIVIDE_Y_BULLET;
+	int x = cntPattern % TEXTURE_PATTERN_DIVIDE_X_ENEMY_BULLET;
+	int y = cntPattern / TEXTURE_PATTERN_DIVIDE_X_ENEMY_BULLET;
+	float sizeX = 1.0f / TEXTURE_PATTERN_DIVIDE_X_ENEMY_BULLET;
+	float sizeY = 1.0f / TEXTURE_PATTERN_DIVIDE_Y_ENEMY_BULLET;
 	
 	bullet->vertexWk[0].tex = D3DXVECTOR2( (float)( x ) * sizeX, (float)( y ) * sizeY );
 	bullet->vertexWk[1].tex = D3DXVECTOR2( (float)( x ) * sizeX + sizeX, (float)( y ) * sizeY );

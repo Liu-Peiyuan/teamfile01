@@ -1,9 +1,10 @@
 //=============================================================================
 //
 // プレイヤー処理 [playerTest.cpp]
-// Author : 
+// Author : kitade mayumi
 //
 //=============================================================================
+
 #include "main.h"
 #include "scene.h"
 #include "playerTest.h"
@@ -22,6 +23,7 @@
 #include "spear.h"
 #include "substitute.h"
 #include "boss.h"
+#include "killer.h"
 
 //*****************************************************************************
 // マクロ定義
@@ -78,6 +80,11 @@ HRESULT InitPlayer(void)
 	int scene = GetScene();
 
 	g_player.invincible = false;									// 無敵状態ではない
+
+	if (scene == SCENE_TUTRIAL)
+	{
+		g_player.pos = D3DXVECTOR3(200.0f, 0.0f, 0.0f);
+	}
 
 	if (scene == SCENE_GAME)
 	{
@@ -172,7 +179,7 @@ void UpdatePlayer(void)
 		return;
 	}
 	
-	if (g_player.warpUse && GetInput(STARTBUTTON))
+	if (g_player.warpUse && GetInput(DOWNMOVE))
 	{
 		if (scene == SCENE_GAME)
 		{
@@ -243,13 +250,14 @@ void UpdatePlayer(void)
 		ENEMYBULLET *enemBullet = GetEnemyBullet(0);
 		SUBSTITUTE *substitute = GetSubstitute();
 		BOSS *boss = GetBoss();
+		KILLER *killer = GetKiller(0);
 
 		if(g_player.countMove != (SCREEN_WIDTH / (int)PLAYER_MAP_MOVE_SPEED))
 		{
 			g_player.pos.x -= PLAYER_MAP_MOVE_SPEED;
 			substitute->pos.x -= PLAYER_MAP_MOVE_SPEED;
 
-			if (scene == SCENE_GAME)
+			if (scene == SCENE_GAME || scene == SCENE_TUTRIAL)
 			{
 				wall->pos.x -= PLAYER_MAP_MOVE_SPEED;
 				for (int k = 0; k < ENEMY_MAX; k++, enemy++)
@@ -277,11 +285,18 @@ void UpdatePlayer(void)
 				item->pos.x -= PLAYER_MAP_MOVE_SPEED;
 			}
 
+			for (int l = 0; l < KILLER_MAX; l++,killer++)
+			{
+				killer->pos.x -= PLAYER_MAP_MOVE_SPEED;
+			}
+
+
 			for (int j = 0; j < (SIZE_X * SIZE_Y * MAP_MAXDATA); j++)
 			{
 				mapchip->pos.x -= PLAYER_MAP_MOVE_SPEED;
 				mapchip++;
 			}
+
 		}
 		g_player.countMove++;
 
@@ -312,6 +327,7 @@ void UpdatePlayer(void)
 
 	CheckHitItem();
 	CheckHitEnemy();
+	CheckHitBoss();
 	CheckPlayerBullet();
 	CheckSpear();
 	CheckHitPlayerSubstitute();
@@ -557,7 +573,6 @@ void AttackPlayer(void)
 		D3DXVECTOR3 pos = g_player.pos;
 		if (g_player.countShot >= PLAYER_TIME_SHOT || g_player.jumpForce > 1)	// 連射用のカウントが規定値を超えているか、二段ジャンプ中なら弾発射
 		{
-			//SetBullet(pos, g_player.direction, g_player.jumpForce);		// 
 			SetBullet(g_player.pos, g_player.direction);
 			g_player.countShot = 0;	// 
 			g_player.hp--;
@@ -694,10 +709,20 @@ void SetTexturePlayer(VERTEX_2D *Vtx, int cntPattern)
 
 	int flashing = (g_player.countInvincible + 1) % 2;
 
-	Vtx[0].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
-	Vtx[1].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
-	Vtx[2].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
-	Vtx[3].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
+	if (!g_player.superInvincible)
+	{
+		Vtx[0].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
+		Vtx[1].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
+		Vtx[2].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
+		Vtx[3].diffuse = D3DCOLOR_RGBA(255, (nokoriHP* g_player.hp) + amari, (nokoriHP* g_player.hp) + amari, flashing * 255);
+	}
+	else
+	{
+		Vtx[0].diffuse = D3DCOLOR_RGBA(0, 0, 0, 255);
+		Vtx[1].diffuse = D3DCOLOR_RGBA(0, 0, 0, 255);
+		Vtx[2].diffuse = D3DCOLOR_RGBA(0, 0, 0, 255);
+		Vtx[3].diffuse = D3DCOLOR_RGBA(0, 0, 0, 255);
+	}
 
 }
 
